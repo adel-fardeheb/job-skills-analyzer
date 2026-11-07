@@ -32,6 +32,7 @@ class Offer(Base):
     created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     collected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    dedup_key: Mapped[str | None] = mapped_column(Text, index=True)
 
 
 def get_engine():
