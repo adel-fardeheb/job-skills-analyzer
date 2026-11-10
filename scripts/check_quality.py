@@ -3,6 +3,15 @@ from sqlalchemy import text
 
 from src.db import get_engine
 
+import re
+
+def words(text):
+    return set(re.findall(r"\w+", (text or "").lower()))
+
+def jaccard(a, b):
+    wa, wb = words(a), words(b)
+    return len(wa & wb) / len(wa | wb) if (wa | wb) else 1.0
+
 engine = get_engine()
 
 # 1. Whole table in a DataFrame (6k rows is small, so this is fine in memory)
@@ -47,15 +56,6 @@ print(dup.sort_values("dedup_key")[cols].head(12).to_string())
 
 # 6. Descriptions at the 5000-character ceiling
 print("\nDescriptions of exactly 5000 characters:", (df["desc_len"] == 5000).sum())
-
-import re
-
-def words(text):
-    return set(re.findall(r"\w+", (text or "").lower()))
-
-def jaccard(a, b):
-    wa, wb = words(a), words(b)
-    return len(wa & wb) / len(wa | wb) if (wa | wb) else 1.0
 
 # 7. Compare each duplicate with the first row of its group
 rows = []
