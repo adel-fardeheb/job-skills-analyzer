@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from dotenv import load_dotenv
-from sqlalchemy import DateTime, String, Text, create_engine
+from sqlalchemy import Boolean, DateTime, String, Text, create_engine, false
 from sqlalchemy.dialects.postgresql import JSONB, insert
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -33,6 +33,8 @@ class Offer(Base):
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     collected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     dedup_key: Mapped[str | None] = mapped_column(Text, index=True)
+    is_duplicate: Mapped[bool] = mapped_column(Boolean, server_default=false())
+    duplicate_of: Mapped[str | None] = mapped_column(Text)
 
 
 def get_engine():
