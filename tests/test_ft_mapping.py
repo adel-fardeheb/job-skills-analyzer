@@ -23,3 +23,12 @@ def test_missing_nested_blocks():
     row = ft_to_row({"id": "X"}, NOW)
     assert row["company"] is None and row["url"] is None
     assert row["created_at"] is None
+
+def test_title_is_stripped():
+    row = ft_to_row({"id": "1", "intitule": "  Développeur Python (H/F) \n"}, NOW)
+    assert row["title"] == "Développeur Python (H/F)"
+
+
+def test_blank_or_missing_title_becomes_none():
+    assert ft_to_row({"id": "1", "intitule": "   "}, NOW)["title"] is None
+    assert ft_to_row({"id": "2"}, NOW)["title"] is None

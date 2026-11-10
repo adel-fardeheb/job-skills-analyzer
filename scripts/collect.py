@@ -14,6 +14,7 @@ from src.ft_search import OffersSearch
 from src.raw_store import save_raw
 from src.request_budget import RequestBudget
 from src.retention import purge_offers, purge_raw
+from src.dedup import apply_duplicates
 
 log = logging.getLogger("collect")
 COUNTS = Path("data/counts_rome_national.csv")
@@ -59,6 +60,10 @@ def main():
                 count += upsert_offers(conn, rows)
         log.info("%s: %d offers", code, count)
         seen += count
+
+    with engine.begin() as conn:
+        flagged = apply_duplicates(conn)
+    log.info("dedup: %d offers flagged as duplicates", flagged)    
 
     with engine.connect() as conn:
         total = conn.execute(text("select count(*) from offers")).scalar()

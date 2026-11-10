@@ -10,7 +10,7 @@ def ft_to_row(offer, collected_at):
     return {
         "source": "france_travail",
         "source_id": offer["id"],
-        "title": offer.get("intitule"),
+        "title": (offer.get("intitule") or "").strip() or None,
         "company": (offer.get("entreprise") or {}).get("nom"),
         "location": (offer.get("lieuTravail") or {}).get("libelle"),
         "description": clean_text(offer.get("description")),
