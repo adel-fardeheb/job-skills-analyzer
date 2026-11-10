@@ -10,12 +10,13 @@ MAX_END = 1149  # the API refuses ranges beyond ~1,150 results
 
 
 class OffersSearch:
-    def __init__(self, token_manager, min_interval=0.4, max_retries=5, timeout=30.0):
+    def __init__(self, token_manager, min_interval=0.4, max_retries=5, timeout=30.0, budget=None):
         self.tokens = token_manager
         self.min_interval = min_interval  # 0.4 s = 2.5 req/s, under the declared 3/s
         self.max_retries = max_retries
         self.client = httpx.Client(timeout=timeout)
         self._last_call = 0.0
+        self.budget = budget
 
     def _throttle(self):
         wait = self.min_interval - (time.monotonic() - self._last_call)
@@ -28,6 +29,8 @@ class OffersSearch:
         query = {**params, "range": f"{start}-{end}"}
         for attempt in range(self.max_retries):
             self._throttle()
+            if self.budget:
+                self.budget.record()
             headers = {"Authorization": f"Bearer {self.tokens.get()}"}
             try:
                 r = self.client.get(SEARCH_URL, params=query, headers=headers)
