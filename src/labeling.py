@@ -27,3 +27,32 @@ def sample_offers(offers, n_extra=5, seed=42):
     chosen.extend(rng.sample(remaining, n_extra))
 
     return chosen
+
+
+def validate_labels(entries):
+    """Return a list of problems found in the labeled entries (empty = valid)."""
+    problems = []
+    seen_ids = set()
+
+    for entry in entries:
+        sid = entry.get("source_id", "<no id>")
+
+        if sid in seen_ids:
+            problems.append(f"{sid}: duplicated offer")
+        seen_ids.add(sid)
+
+        skills = entry.get("skills")
+        if not isinstance(skills, list):
+            problems.append(f"{sid}: 'skills' is not a list")
+            continue
+
+        for skill in skills:
+            if not isinstance(skill, str) or not skill.strip():
+                problems.append(f"{sid}: empty or non-text skill {skill!r}")
+            elif skill != skill.strip().lower():
+                problems.append(f"{sid}: not lowercase or has edge spaces: {skill!r}")
+
+        if len(skills) != len(set(skills)):
+            problems.append(f"{sid}: duplicated skills in the same offer")
+
+    return problems

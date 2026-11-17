@@ -1,4 +1,4 @@
-from src.labeling import sample_offers
+from src.labeling import sample_offers, validate_labels
 
 
 def make_offers(codes_and_counts):
@@ -46,3 +46,25 @@ def test_extra_is_capped_when_pool_is_small():
     small = make_offers({"A1": 2, "B2": 1})
     result = sample_offers(small, n_extra=50)
     assert len(result) == 3  # every offer, no error
+
+
+def test_valid_labels_have_no_problems():
+    entries = [{"source_id": "1", "skills": ["python", "sql"]},
+               {"source_id": "2", "skills": []}]
+    assert validate_labels(entries) == []
+
+
+def test_detects_uppercase_and_edge_spaces():
+    entries = [{"source_id": "1", "skills": ["Python", " sql"]}]
+    assert len(validate_labels(entries)) == 2
+
+
+def test_detects_duplicate_skill_in_offer():
+    entries = [{"source_id": "1", "skills": ["python", "python"]}]
+    assert len(validate_labels(entries)) == 1
+
+
+def test_detects_duplicate_offer_and_bad_type():
+    entries = [{"source_id": "1", "skills": "python"},
+               {"source_id": "1", "skills": []}]
+    assert len(validate_labels(entries)) == 2
